@@ -15,6 +15,7 @@ faiss-cpu = "^1.8.0"
 nltk = "^3.8.1"
 sentence-transformers = "^2.5.1"
 pymystem3 = "^0.2.0"
+punctuators = "^0.0.5"
 
 
 
