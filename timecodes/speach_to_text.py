@@ -31,4 +31,4 @@ class SpeechToTextWhisperX:
         with open("result.txt", "w", encoding="utf-8") as f:
             for seg in result["segments"]:
                 f.write(f"{seg['start']} {seg['end']} {seg['text']}\n")
-        return result
+        return result["segments"]
