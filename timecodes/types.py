@@ -19,6 +19,7 @@ class Chapter:
         if self.title is None:
             self.title = " ".join(self.content.split(" ")[:5]) + "..."
 
+
 @dataclass
 class Timecodes:
     """
@@ -29,4 +30,5 @@ class Timecodes:
 
     def __str__(self):
         return "\n".join([self.media_file]
-                         + [f"{chapter.start} {chapter.title}" for chapter in self.chapters])
+                         + [f"{chapter.start // 60}:{chapter.start % 60} {chapter.title}\n {chapter.content}" for
+                            chapter in self.chapters])
