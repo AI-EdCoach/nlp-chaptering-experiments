@@ -1,9 +1,10 @@
 from timecodes.speech_to_text import SpeechToTextWhisperX
-from timecodes.chapters_to_timecodes import ChapterTimecodesPipeline
-from timecodes.speech_to_chapters import ChapterEstimator
+from timecodes.pipelines import ChapterTimecodesPipeline
+from timecodes.chapter_estimation import ChapterEstimator
+from timecodes.summarize import Summarizer
 
 sp2txt = SpeechToTextWhisperX(model_name="tiny")
 sp2chptrs = ChapterEstimator()
-
-chptrs2timecodes = ChapterTimecodesPipeline(sp2txt, sp2chptrs)
+summarizer = Summarizer()
+chptrs2timecodes = ChapterTimecodesPipeline(sp2txt, sp2chptrs, summarizer)
 

@@ -14,11 +14,13 @@ class ChapterTimecodesPipeline:
     3. Returns chapters_df
     """
 
-    def __init__(self, speach2text_model, chapter_estimator):
+    def __init__(self, speach2text_model, chapter_estimator, summarizer=None):
         self.speach2text_model = speach2text_model
         self.chapter_estimator = chapter_estimator
+        if summarizer is not None:
+            self.summarizer = summarizer
 
-    def __call__(self, media_file: str):
+    def __call__(self, media_file: str, min_chapter_length: int = 15, summarize: bool = False):
         """
         Extracts chapters from media file.
         :param media_file: str - path to media file
@@ -28,11 +30,11 @@ class ChapterTimecodesPipeline:
 
         preds = self.speach2text_model(media_file)
         text = " ".join([seg['text'] for seg in preds['segments']])
-        chapters_df = self.chapter_estimator(text, 0.25)
+        chapters_df = self.chapter_estimator(text)
 
         return chapters_df
 
-    def call_for_segments(self, segments: List[Dict[str, Any]], threshold: float | None = None) -> Timecodes:
+    def call_for_segments(self, segments: List[Dict[str, Any]], summarize: bool = False) -> Timecodes:
         text_segs = [seg['text'] for seg in segments]
         chapters_df = self.chapter_estimator(text_segs)
 
@@ -47,11 +49,28 @@ class ChapterTimecodesPipeline:
         timecodes = []
         new_chapter_indexes = preds_df[preds_df.apply(lambda x: x["chapter"] == 1, axis=1)].index
         chapters = np.split(preds_df, new_chapter_indexes)
+
         for i, chapter in enumerate(chapters):
             if len(chapter) > 0:
-                timecodes.append(
-                    Chapter(start=chapter["start"].min(), end=chapter["start"].max(),
-                            content=" ".join(chapter["segments"])))
+                if chapter["start"].max() - chapter["start"].min() < 15:
+                    timecodes[-1].content += " ".join(chapter["segments"])
+                    timecodes[-1].end = chapter["start"].max()
+
+                    if summarize:
+                        timecodes[-1].title = self.summarizer(timecodes[-1].content)
+
+                    continue
+
+                if summarize:
+                    timecodes.append(
+                        Chapter(start=chapter["start"].min(), end=chapter["start"].max(),
+                                content=" ".join(chapter["segments"]),
+                                title=self.summarizer(" ".join(chapter["segments"]))))
+                else:
+                    timecodes.append(
+                        Chapter(start=chapter["start"].min(), end=chapter["start"].max(),
+                                content=" ".join(chapter["segments"])))
+
         timecodes = Timecodes(
             chapters=timecodes,
             media_file="test",
