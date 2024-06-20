@@ -1,12 +1,8 @@
-FROM python:3.12.2-slim
+FROM python:3.10
 
-WORKDIR /app
+WORKDIR /home/MLServiceProj
 
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+COPY requirements.txt requirements.txt
+RUN pip3.10 install -r requirements.txt
 
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-
-COPY . .
-
+COPY . /home/MLServiceProj
