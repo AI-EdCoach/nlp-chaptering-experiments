@@ -34,5 +34,5 @@ class Timecodes:
 
     def __str__(self):
         return "\n".join([self.media_file]
-                         + [f"{chapter.start // 60}:{chapter.start % 60} {chapter.title}\n {chapter.content}" for
+                         + [f"{chapter.start // 60}:{chapter.start % 60} {chapter.title}\n" for
                             chapter in self.chapters])
