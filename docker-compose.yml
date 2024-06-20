@@ -1,0 +1,48 @@
+version: '3.7'
+
+services:
+    project_redis:
+        container_name: project_redis
+        hostname: redis
+        image: redis:latest
+        command: --port ${REDIS_PORT}
+        ports:
+            - "${REDIS_PORT}:${REDIS_PORT}"
+        restart: always
+
+    api:
+        container_name: api
+        build:
+            context: ./
+            dockerfile: ./Dockerfile
+        ports:
+        - "${API_PORT}:${API_PORT}"
+        working_dir: /home/MLServiceProj
+        volumes:
+            - ./:/home/MLServiceProj
+        links:
+            - project_redis
+        command: uvicorn backend.main:app --host ${API_HOST} --port ${API_PORT} --reload
+
+    worker:
+        container_name: worker
+        build:
+            context: ./
+            dockerfile: ./Dockerfile   
+        links:
+            - project_redis         
+        command: rq worker --url redis://project_redis:${REDIS_PORT}
+        env_file:
+            .env 
+    
+    dash_frontend:
+        container_name: dash_frontend
+        build:
+            context: ./
+            dockerfile: ./Dockerfile            
+        ports:
+            - "${FRONTEND_EXPOSED_PORT}:${FRONTEND_PORT}"
+        volumes:
+            - ./uploaded_videos:/home/MLServiceProj/frontend/static
+        working_dir: /home/MLServiceProj
+        command: python3.10 -m frontend.app
