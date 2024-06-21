@@ -22,9 +22,15 @@ class Chapter(BaseModel):
     content: str
     title: Optional[str] = None
 
+    class Config:
+        from_attributes = True
+
 
 class TimeCodes(BaseModel):
     chapters: List[Chapter]
+
+    class Config:
+        from_attributes = True
 
 
 class TimeCodePredictionOutput(BaseModel):
