@@ -29,8 +29,8 @@ services:
         build:
             context: ./
             dockerfile: ./Dockerfile   
-        links:
-            - project_redis         
+        volumes:
+            - ./:/home/MLServiceProj
         command: rq worker --url redis://project_redis:${REDIS_PORT}
         env_file:
             .env 
@@ -43,6 +43,6 @@ services:
         ports:
             - "${FRONTEND_EXPOSED_PORT}:${FRONTEND_PORT}"
         volumes:
-            - ./uploaded_videos:/home/MLServiceProj/frontend/static
+            - ./:/home/MLServiceProj
         working_dir: /home/MLServiceProj
         command: python3.10 -m frontend.app
