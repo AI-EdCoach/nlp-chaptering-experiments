@@ -14,7 +14,6 @@ from backend.core.config import settings
 from backend.crud import get_user_predictions
 from backend.core.security import get_password_hash, verify_password
 from backend.schemas.user import UserCreateSchema, UserUpdateSchema, UserReadSchema
-from backend.schemas.prediction import PredictionOutSchema
 from backend.models import User
 from backend.schemas.auth import TokenPayload
 from backend.schemas.user import UserReadSchema
@@ -86,8 +85,3 @@ def update_user(
             detail="The user with this username does not exist in the system",
         )
     return db_user
-
-
-@router.get("/me/predictions", response_model=List[PredictionOutSchema])
-def get_user_preds(session: SessionDep, current_user: CurrentUserDep):
-    return get_user_predictions(session=session, user_id=current_user.id)
