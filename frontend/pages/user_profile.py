@@ -15,7 +15,7 @@ dash.register_page(__name__)
 @callback(
     Output("home_username", "children"),
     Output("home_email", "children"),
-    Input("session", "data"),
+    Input("login_session", "data"),
 )
 def set_info(session_data: Dict) -> Tuple[str, str, str]:
     username_desc = ""

@@ -13,12 +13,12 @@ dash.register_page(__name__)
 
 
 @callback(
-    Output("session", "data"),
+    Output("login_session", "data"),
     Output("login_successful", "is_open"),
     Output("login_missing-data", "is_open"),
     Output("login_error", "is_open"),
     Input("login_button", "n_clicks"),
-    State("session", "data"),
+    State("login_session", "data"),
     State("login_form_email", "value"),
     State("login_form_password", "value"),
 )

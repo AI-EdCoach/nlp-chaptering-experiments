@@ -20,7 +20,7 @@ app = Dash(
 )
 
 
-@callback(Output("app-navbar", "children"), Input("session", "data"))
+@callback(Output("app-navbar", "children"), Input("login_session", "data"))
 def set_navbar(session_data: Dict) -> Dict:
     print(f"set navbar based on {session_data}")
     items = non_authorized_user_navbar_items()
@@ -40,14 +40,12 @@ def get_auth_navbar_items() -> List[dbc.NavItem]:
 
 
 def get_authorized_navbar_dropdown_menu() -> dbc.DropdownMenu:
-    models_page = dash.page_registry["pages.models"]
+    models_page = dash.page_registry["pages.video_analytics"]
     profile_page = dash.page_registry["pages.user_profile"]
-    history_page = dash.page_registry["pages.history"]
     dropdown = dbc.DropdownMenu(
         children=[
             dbc.DropdownMenuItem("Profile", href=profile_page["relative_path"]),
-            dbc.DropdownMenuItem("Models", href=models_page["relative_path"]),
-            dbc.DropdownMenuItem("History", href=history_page["relative_path"]),
+            dbc.DropdownMenuItem("EdCoach", href=models_page["relative_path"]),
         ],
         nav=True,
         in_navbar=True,
@@ -93,7 +91,13 @@ def create_layout():
         [
             navbar,
             dash.page_container,
-            dcc.Store(id="session", storage_type="memory", data={"token": None}),
+            dcc.Store(id="login_session", storage_type="memory", data={"token": None}),
+            dcc.Store(
+                id="uploaded_video_session", storage_type="memory", data={"token": None}
+            ),
+            dcc.Store(
+                id="timecodes_session", storage_type="memory", data={"token": None}
+            ),
         ]
     )
 
