@@ -27,6 +27,5 @@ class Prediction(SQLModel, table=True):
     rq_job_id: str
     rq_status: str
     started_at: datetime
-    # prediction output
     user_initiator: User = Relationship(back_populates="predictions")
-    video_file: FilePath
+    video_name: str
