@@ -2,9 +2,10 @@ import os
 import requests
 from http import HTTPStatus
 from pprint import pprint
-from typing import Dict
+from typing import Dict, Optional
 from requests import Response
 from backend.core.config import settings
+from backend.schemas.prediction import TimeCodes
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -14,8 +15,7 @@ BACKEND_API = f"http://api:{os.environ['API_PORT']}"
 REGISTER_ENDPOINT = f"{BACKEND_API}{settings.API_V1_STR}/auth/register"
 LOGIN_ENDPOINT = f"{BACKEND_API}{settings.API_V1_STR}/auth/login"
 CURRENT_USER_ENDPOINT = f"{BACKEND_API}{settings.API_V1_STR}/users/me"
-PREDS_ENDPOINT = f"{BACKEND_API}{settings.API_V1_STR}/prediction"
-USER_PREDS_ENDPOINT = f"{BACKEND_API}{settings.API_V1_STR}/users/me/predictions"
+TIMECODES_ENDPOINT = f"{BACKEND_API}{settings.API_V1_STR}/prediction/timecode"
 NEW_VIDEO_ENDPOINT = f"{BACKEND_API}{settings.API_V1_STR}/videos/new"
 
 RQ_JOB_FINISHED_STATUS = "finished"
@@ -43,12 +43,6 @@ def login_via_api(email: str, password: str) -> Response:
 def get_current_user_data_via_api(access_token: str) -> Response:
     headers = {"Authorization": f"Bearer {access_token}"}
     response: Response = requests.get(CURRENT_USER_ENDPOINT, headers=headers)
-    return response
-
-
-def get_current_user_predictions_via_api(access_token: str) -> Response:
-    headers = {"Authorization": f"Bearer {access_token}"}
-    response: Response = requests.get(USER_PREDS_ENDPOINT, headers=headers)
     return response
 
 
@@ -83,10 +77,10 @@ def generate_test_prediction_input() -> Dict:
     return prediction_create
 
 
-def init_predict(prediction_data: Dict, model_name: str, token: str) -> Response:
+def init_timecode_predict(video_name: str, token: str) -> Response:
     headers = {"Authorization": f"Bearer {token}"}
     response: Response = requests.post(
-        f"{PREDS_ENDPOINT}/{model_name}", json=prediction_data, headers=headers
+        TIMECODES_ENDPOINT, json={"video_name": video_name}, headers=headers
     )
     return response
 
@@ -96,7 +90,7 @@ def wait_untill_prediction_end(prediction_id: int, token: str) -> Response:
     headers = {"Authorization": f"Bearer {token}"}
     while waiting_for_predict:
         response: Response = requests.get(
-            f"{PREDS_ENDPOINT}/{prediction_id}", headers=headers
+            f"{TIMECODES_ENDPOINT}/{prediction_id}", headers=headers
         )
         response_data = response.json()
         waiting_for_predict = response_data["rq_status"] not in [
@@ -106,36 +100,24 @@ def wait_untill_prediction_end(prediction_id: int, token: str) -> Response:
     return response
 
 
+def get_timecode_prediction(prediction_id: int, token: str) -> TimeCodes:
+    response = wait_untill_prediction_end(prediction_id=prediction_id, token=token)
+    response_data = response.json()
+    return TimeCodes.model_validate(response_data["timecodes"])
+
+
 def get_name_for_new_video() -> str:
     response: Response = requests.get(NEW_VIDEO_ENDPOINT)
     return response.json()["name"]
 
 
 if __name__ == "__main__":
+    from pprint import pprint
+    import pickle
 
-    def make_pred():
-        token = login_via_api(
-            email="shilkov1.one@gmail.com", password="q2w3e4r"
-        ).json()["access_token"]
-        headers = {"Authorization": f"Bearer {token}"}
-        pred_input = generate_test_prediction_input()
-        response: Response = requests.post(
-            LOGREG_ENDPOINT, json=pred_input, headers=headers
-        )
-        return response
-
-    def get_pred(id: int):
-        token = login_via_api(
-            email="shilkov1.one@gmail.com", password="q2w3e4r"
-        ).json()["access_token"]
-        headers = {"Authorization": f"Bearer {token}"}
-        response: Response = requests.get(f"{PREDS_ENDPOINT}/{id}", headers=headers)
-        print(response.status_code)
-        pprint(response.json())
-        # print(response.json()["rq_status"])
-        # print(response.json()["result"])
-
-    token = login_via_api(email="shilkov1.one@gmail.com", password="q2w3e4r").json()[
-        "access_token"
-    ]
-    r = get_current_user_predictions_via_api(token)
+    with open(
+        "/home/andrey/AS/ITMO/MLServicesProject/ai_ed_coach/timecodes.dill", "rb"
+    ) as f:
+        data = pickle.load(f)
+    TIMECODES: TimeCodes = TimeCodes.model_validate(data)
+    pprint(TIMECODES)
