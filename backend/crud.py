@@ -33,7 +33,6 @@ def get_user_predictions(session: Session, user_id: int) -> List[Prediction]:
 
 def create_prediction_item(
     session: Session,
-    model_id: int,
     user_id: int,
     rq_job_id: str,
     rq_status: str,
@@ -55,31 +54,10 @@ def create_prediction_item(
     return db_obj
 
 
-def update_prediction_after_successfull_finish(
-    session: Session, prediction_id: int, result: str
-) -> Prediction:
-    db_prediction: Prediction = session.get(Prediction, prediction_id)
-    if db_prediction.rq_status == RQ_JOB_FINISHED_STATUS:
-        return db_prediction
-
-    db_prediction.rq_status = RQ_JOB_FINISHED_STATUS
-    db_prediction.result = result
-    session.add(db_prediction)
+def delete_prediction_by_id(session: Session, pred_id: int) -> None:
+    predicton = session.get(Prediction, pred_id)
+    session.delete(predicton)
     session.commit()
-    session.refresh(db_prediction)
-    return db_prediction
-
-
-def update_prediction_after_fail(session: Session, prediction_id: int) -> None:
-    db_prediction: Prediction = session.get(Prediction, prediction_id)
-    if db_prediction.rq_status == RQ_JOB_FINISHED_STATUS:
-        return db_prediction
-
-    db_prediction.rq_status = RQ_JOB_FAILED_STATUS
-    session.add(db_prediction)
-    session.commit()
-    session.refresh(db_prediction)
-    return db_prediction
 
 
 def get_user_by_email(session: Session, email: str) -> Optional[User]:
