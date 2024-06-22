@@ -33,3 +33,5 @@ open localhost:10000
 ![img](readme_assets/video.png)
 
 #### Просмотр результатов 
+
+![img](readme_assets/results.png)
