@@ -73,7 +73,9 @@ def start_timecode_prediction(
     """
     Start timecode prediction.
     """
-    rq_job = queue.enqueue(timecode_prediction, prediction_create_input.video_name)
+    rq_job = queue.enqueue(
+        timecode_prediction, prediction_create_input.video_name, job_timeout="1h"
+    )
     created_prediction = create_prediction_item(
         session=session,
         user_id=current_user.id,
