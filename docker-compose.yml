@@ -12,6 +12,9 @@ services:
 
     api:
         container_name: api
+        depends_on:
+            - project_redis
+            - worker 
         build:
             context: ./
             dockerfile: ./Dockerfile
@@ -24,8 +27,26 @@ services:
             - project_redis
         command: uvicorn backend.main:app --host ${API_HOST} --port ${API_PORT} --reload
 
+    worker_init_container:
+        container_name: worker_init_container
+        depends_on:
+            - project_redis
+        build:
+            context: ./
+            dockerfile: ./Dockerfile   
+        volumes:
+            - ./:/home/MLServiceProj
+        command: python3.10 /home/MLServiceProj/worker.py
+        env_file:
+            .env
+
     worker:
         container_name: worker
+        depends_on:
+            project_redis:
+                condition: service_started
+            worker_init_container:
+                condition: service_completed_successfully
         build:
             context: ./
             dockerfile: ./Dockerfile   
