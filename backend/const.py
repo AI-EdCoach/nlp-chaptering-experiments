@@ -6,4 +6,4 @@ BACKEND_DIR = FILE_PATH.parent
 REPO_DIR = BACKEND_DIR.parent
 WORKSPACE_DIR = REPO_DIR.parent
 
-UPLOADED_VIDEOS_ROOT = REPO_DIR / "uploaded_videos"
+UPLOADED_VIDEOS_ROOT = REPO_DIR / "frontend/static"
