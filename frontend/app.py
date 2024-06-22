@@ -104,4 +104,4 @@ def create_layout():
 
 if __name__ == "__main__":
     create_layout()
-    app.run(host="0.0.0.0", debug=True, port=os.environ["FRONTEND_PORT"])
+    app.run(host="0.0.0.0", debug=False, port=os.environ["FRONTEND_PORT"])
